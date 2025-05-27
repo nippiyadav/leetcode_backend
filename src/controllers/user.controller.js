@@ -109,7 +109,7 @@ const loginController = asyncHandler(async (req, res) => {
     const options = {
         httpOnly: process.env.VITE_NODE_ENV !== "production"?false:true,
         secure: process.env.VITE_NODE_ENV !== "production"?false:true,
-        sameSite: "lax",
+        sameSite: "none",
         maxAge: 1000 * 60 * 60 * 24
     }
     res.cookie("accessToken", accessToken, options)
