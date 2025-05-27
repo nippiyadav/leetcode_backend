@@ -18,8 +18,6 @@ dotenv.config({
 app.use(cors({
     origin:"http://localhost:5173",
     credentials:true,
-    
-    
 }))
 
 app.use(express.json());
@@ -32,7 +30,7 @@ app.use("/execute-code",executeRouter)
 app.use("/submission",submissionRouter)
 
 
-app.post("/health",(req,res)=>{
+app.get("/health",(req,res)=>{
     // console.log("Starting");
     // const data = fs.readFileSync(0,"utf-8");
     // console.log(data);
