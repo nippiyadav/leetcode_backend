@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily  with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Difficulty {
+  HARD
+  MEDIUM
+  EASY
+}
+
+model User {
+   id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  username String  @unique
+  fullname String?
+  email    String  @unique
+  image    String?
+  password String
+  refreshToken String?
+  role     Role @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  problem Problem[]
+  submission Submission[]
+  problemSolved ProblemSolved[] 
+}
+
+// do not forget includeing the @default(auto()), otherwise it will throw error
+model Problem {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  description String
+  difficulty Difficulty
+  tags String[] // ["tag1","tag2","tag3"]
+  userId String @db.ObjectId
+  example Json
+  templateCode Json
+  constraints String[]
+  hints String[]
+  editorial String?
+  codeSnippets Json
+  tastCases Json 
+  refrenceSolution Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  user User @relation(fields: [userId],references: [id],onDelete:Cascade) 
+
+  submission Submission[]
+  solvedBy ProblemSolved[]
+}
+
+model Submission {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  problemId String @db.ObjectId
+  sourceCode Json
+  language String
+  stdin String?
+  stderr String?
+  stdout String?
+  compileOutput String?
+  status String // accepted , wrong answer
+  memory String?
+  time String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete:Cascade)
+  problem Problem @relation(fields: [problemId], references: [id],onDelete:Cascade)
+
+  testCases TestCasesResult[]
+}
+
+
+model TestCasesResult{
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  submissionId String @db.ObjectId
+  testCases Int
+  passed Boolean
+  stdout String?
+  expected String
+  stderr String?
+  compileOutput String?
+  status String // accepted , wrong answer
+  memory String?
+  time String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submission Submission @relation(fields: [submissionId],references: [id],onDelete:Cascade)
+
+  @@index([submissionId])
+}
+
+model ProblemSolved {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  problemId String @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId],references: [id],onDelete:Cascade)
+  problem Problem @relation(fields: [problemId], references: [id],onDelete:Cascade)
+
+  @@unique([userId,problemId])
+}
+
+/*
+for prisma studio openin:- npx prisma studio
+for generate and db push
+npx prisma generate
+npx prisma db push
+*/
