@@ -107,8 +107,8 @@ const loginController = asyncHandler(async (req, res) => {
 
     // cookie Options
     const options = {
-        httpOnly: false,
-        secure: false,
+        httpOnly: process.env.VITE_NODE_ENV !== "production"?false:true,
+        secure: process.env.VITE_NODE_ENV !== "production"?false:true,
         sameSite: "lax",
         maxAge: 1000 * 60 * 60 * 24
     }
@@ -170,7 +170,7 @@ const logOut = asyncHandler(async (req,res)=>{
     }
 
     res.clearCookie("accessToken",{
-        httpOnly:true,
+        httpOnly:process.env.VITE_NODE_ENV !== "development",
         sameSite:"lax",
         secure:process.env.NODE_ENV !== "development"
     })
