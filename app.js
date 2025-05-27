@@ -23,8 +23,9 @@ const frontendOrigin =
 console.log("Using frontend origin:", frontendOrigin);
 
 app.use(cors({
-  origin: frontendOrigin,
+  origin: "https://leetcode-frontend-o62e.onrender.com",
   credentials: true,
+  allowedHeaders:["Access-Control-Allow-Headers",'Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
