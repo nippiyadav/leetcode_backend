@@ -15,8 +15,11 @@ dotenv.config({
     path:"./env"
 });
 
+console.log(process.env.VITE_NODE_ENV !== "production"?process.env.VITE_FRONTEND_API_DEVELOPMENT:process.env.VITE_FRONTEND_API_PRODUCTION);
+
+
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin:process.env.VITE_NODE_ENV !== "production"?process.env.VITE_FRONTEND_API_DEVELOPMENT:process.env.VITE_FRONTEND_API_PRODUCTION,
     credentials:true,
 }))
 
