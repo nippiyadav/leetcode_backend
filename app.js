@@ -23,7 +23,7 @@ const frontendOrigin =
 console.log("Using frontend origin:", frontendOrigin);
 
 app.use(cors({
-  origin: "https://leetcode-frontend-o62e.onrender.com/",
+  origin: frontendOrigin,
   credentials: true,
 }));
 
@@ -44,7 +44,7 @@ app.get("/health",(req,res)=>{
     // console.log("ending");
     let value = req.cookies;
     console.log("value:- ",value);
-    res.status(200).json({backend:"running smoothly",cookies:value})
+    res.status(200).json({backend:"running smoothly",cookies:value,})
 })
 
 
