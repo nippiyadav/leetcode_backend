@@ -33,10 +33,10 @@ app.use("/submission",submissionRouter)
 
 
 app.post("/",(req,res)=>{
-    console.log("Starting");
-    const data = fs.readFileSync(0,"utf-8");
-    console.log(data);
-    console.log("ending");
+    // console.log("Starting");
+    // const data = fs.readFileSync(0,"utf-8");
+    // console.log(data);
+    // console.log("ending");
     res.status(200).json(new ApiResponse(200,[],"Successfully fetched Data"))
 })
 
