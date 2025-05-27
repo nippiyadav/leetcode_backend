@@ -59,7 +59,7 @@ const loginController = asyncHandler(async (req, res) => {
     const { password, email } = req.body
     const userSendValue = req.body;
 
-    // console.log(userSendValue,userSendValue.password);
+    console.log(userSendValue,userSendValue.password);
 
     for (const key in userSendValue) {
         if (!userSendValue[key]) {
@@ -114,7 +114,7 @@ const loginController = asyncHandler(async (req, res) => {
     }
     res.cookie("accessToken", accessToken, options)
 
-    // console.log(accessToken,refreshToken);
+    console.log(accessToken,refreshToken);
 
 
     res.status(200).json(new ApiResponse(200, "Successfully User login", newData))
