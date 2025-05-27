@@ -104,21 +104,27 @@ const loginController = asyncHandler(async (req, res) => {
 
     // console.log("updating Data in the login for the ",newData);
     
-
-    // cookie Options
     const options = {
-        httpOnly:true,
+        httpOnly: true,
         secure:true,
         sameSite: "none",
         priority:"high",
         maxAge: 1000 * 60 * 60 * 24
     }
+
+    // cookie Options
+    // const options = {
+    //     httpOnly: process.env.VITE_NODE_ENV !== "production"?false:true,
+    //     secure: process.env.VITE_NODE_ENV !== "production"?false:true,
+    //     sameSite: "none",
+    //     maxAge: 1000 * 60 * 60 * 24
+    // }
     res.cookie("accessToken", accessToken, options)
 
     console.log(accessToken,refreshToken);
 
 
-    res.status(200).json(new ApiResponse(200, "Successfully User login", newData))
+    res.status(200).json(new ApiResponse(200, newData,"Successfully User login"))
 })
 
 const currentUser = asyncHandler(async (req,res)=>{
