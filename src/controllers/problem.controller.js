@@ -1,10 +1,8 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { prismaDb } from "../libs/prisma.js";
 import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judge0.lib.js";
-import { ResponseApi } from "../utils/responseApi.js"
-import { ErrorApi } from "../utils/errorApi.js"
-import { ApiResponse } from "../../../../cohort_backend/src/utils/apiResponse.js";
-import ApiError from "../../../../cohort_backend/src/utils/apiErrorResponse.js";
+import { ApiResponse } from "../utils/responseApi.js"
+import { ApiError } from "../utils/errorApi.js"
 import { languageTemplate } from "../libs/languageTemplate.js";
 
 const createProblem = asyncHandler(async (req, res) => {
@@ -14,7 +12,7 @@ const createProblem = asyncHandler(async (req, res) => {
     
 
     if (req.admin !== "ADMIN") {
-        res.status(403).json(new ErrorApi(403, false, [{ error: "You are not allowed to create a problem" }]))
+        res.status(403).json(new ApiError(403, false, [{ error: "You are not allowed to create a problem" }]))
     }
 
     //  save the result in the database
@@ -24,7 +22,7 @@ const createProblem = asyncHandler(async (req, res) => {
                 title, description, difficulty, tags, example, constraints, tastCases, refrenceSolution, codeSnippets,hints,templateCode, userId: req.user.id
             }
         })
-        return res.status(201).json(new ResponseApi(201, newProblem, "Successfully Created Problem"))
+        return res.status(201).json(new ApiResponse(201, newProblem, "Successfully Created Problem"))
     } catch (error) {
         console.log("Saving in database error occured", { cause: error })
         return res.status(500).json(new ApiError(500,"Server error",[{error:error}]))
@@ -46,7 +44,7 @@ const testingProblem = asyncHandler(async (req, res) => {
     console.log("createProblem:- ", req.admin)
     // checking user is admin role
     if (req.admin !== "ADMIN") {
-        res.status(403).json(new ErrorApi(403, false, [{ error: "You are not allowed to create a problem" }]))
+        res.status(403).json(new ApiError(403, false, [{ error: "You are not allowed to create a problem" }]))
     }
 
     try {
@@ -55,7 +53,7 @@ const testingProblem = asyncHandler(async (req, res) => {
             console.log(languageId);
 
             if (!languageId) {
-                res.status(400).json(new ErrorApi(400, false, [{ error: `language ${language} is not supported` }]))
+                res.status(400).json(new ApiError(400, false, [{ error: `language ${language} is not supported` }]))
             }
             // i stuck here because i wrote like language_Id, so please language_id
             const submission = tastCases.map(({ input, output }) => ({
@@ -88,12 +86,12 @@ const testingProblem = asyncHandler(async (req, res) => {
                 console.log("single Result:- ", result);
 
                 if (result.status.id !== 3) {
-                    return res.status(200).json(new ResponseApi(201, results, "Some TestCase failed"));
-                    // return res.status(400).json(new ErrorApi(400, false, [{ error: `TestCase ${i + 1} failed for language ${language}` }]))
+                    return res.status(200).json(new ApiResponse(201, results, "Some TestCase failed"));
+                    // return res.status(400).json(new ApiError(400, false, [{ error: `TestCase ${i + 1} failed for language ${language}` }]))
                 }
             }
 
-            return res.status(200).json(new ResponseApi(201, results, "All testCase Passed"))
+            return res.status(200).json(new ApiResponse(201, results, "All testCase Passed"))
         }
     } catch (error) {
         console.log("error in creating Problem:- ", error);
@@ -105,11 +103,11 @@ const testingProblem = asyncHandler(async (req, res) => {
 const getAllProblems = asyncHandler(async (req, res) => {
     const problems = await prismaDb.problem.findMany({select:{id:true,difficulty:true,title:true,updatedAt:true,createdAt:true}});
     if (!problems) {
-        return res.status(404).json(new ErrorApi(404, false, [{ error: "Not Found" }]))
+        return res.status(404).json(new ApiError(404, false, [{ error: "Not Found" }]))
     }
     console.log("getProblems- ", problems);
 
-    res.status(200).json(new ResponseApi(200, problems, "Successfuly fetched Problems"))
+    res.status(200).json(new ApiResponse(200, problems, "Successfuly fetched Problems"))
 })
 
 const getProblemsId = asyncHandler(async (req, res) => {
@@ -122,7 +120,7 @@ const getProblemsId = asyncHandler(async (req, res) => {
     })
 
     if (!singleProblem) {
-        return res.status(404).json(new ErrorApi(404, false, [{ error: "Problem not found" }]))
+        return res.status(404).json(new ApiError(404, false, [{ error: "Problem not found" }]))
     }
 
     res.status(200).json(new ApiResponse(200, singleProblem, "Successfully Fetched data"))

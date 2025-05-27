@@ -1,10 +1,8 @@
-import ApiError from "../../../../cohort_backend/src/utils/apiErrorResponse.js";
-import { ApiResponse } from "../../../../cohort_backend/src/utils/apiResponse.js";
 import { prismaDb } from "../libs/prisma.js";
 import { User } from "../models/mongodb/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { ErrorApi } from "../utils/errorApi.js";
-import { ResponseApi } from "../utils/responseApi.js";
+import { ApiError } from "../utils/errorApi.js";
+import { ApiResponse } from "../utils/responseApi.js";
 import { commonFunction } from "../utils/utils.js";
 
 
@@ -17,14 +15,14 @@ const registerController = asyncHandler(async (req, res) => {
 
     for (const key in userSendValue) {
         if (!userSendValue[key]) {
-            return res.status(404).json(new ErrorApi(404, "Please provide full details", [{ error: `Please provide full detail ${key}` }]))
+            return res.status(404).json(new ApiError(404, "Please provide full details", [{ error: `Please provide full detail ${key}` }]))
         }
     }
 
 /*/ this is the mongoose schema for mondodb connection
     const userAlreadyExist = await User.findOne({ email }).lean();
     if (userAlreadyExist) {
-        return res.status(404).json(new ErrorApi(404, "User already exist", [{ error: "User already exist" }]))
+        return res.status(404).json(new ApiError(404, "User already exist", [{ error: "User already exist" }]))
     }
 
     const newUserCreated = await User.create({
@@ -40,7 +38,7 @@ const registerController = asyncHandler(async (req, res) => {
     });
 
     if (userExisting) {
-        return res.status(404).json(new ErrorApi(404, "User already exist", [{ error: "User already exist" }]))
+        return res.status(404).json(new ApiError(404, "User already exist", [{ error: "User already exist" }]))
     }
 
     const hashPassword = await commonFunction.hasingPassword(password)
@@ -54,7 +52,7 @@ const registerController = asyncHandler(async (req, res) => {
         }
     })
 
-    res.status(200).json(new ResponseApi(200, "Successfully created user", {...newUserMaking,password:"",refreshToken:""}))
+    res.status(200).json(new ApiResponse(200, "Successfully created user", {...newUserMaking,password:"",refreshToken:""}))
 })
 
 const loginController = asyncHandler(async (req, res) => {
@@ -65,7 +63,7 @@ const loginController = asyncHandler(async (req, res) => {
 
     for (const key in userSendValue) {
         if (!userSendValue[key]) {
-            return res.status(404).json(new ErrorApi(404, "Please provide full details", [{ error: `Please provide full detail ${key}` }]))
+            return res.status(404).json(new ApiError(404, "Please provide full details", [{ error: `Please provide full detail ${key}` }]))
         }
     }
 
@@ -78,13 +76,13 @@ const loginController = asyncHandler(async (req, res) => {
     // console.log("User Existing:- ", userAlreadyExist);
     
     if (!userAlreadyExist) {
-        return res.status(401).json(new ErrorApi(401, "User does not exist", [{ error: "User does not exist" }]))
+        return res.status(401).json(new ApiError(401, "User does not exist", [{ error: "User does not exist" }]))
     }
 
     const isCorrectPassword = await commonFunction.isPasswordCorrect(password,userAlreadyExist.password)
 
     if (!isCorrectPassword) {
-        return res.status(404).json(new ErrorApi(404, "Invalid credentials", [{ error: "Invalid credentials" }]))
+        return res.status(404).json(new ApiError(404, "Invalid credentials", [{ error: "Invalid credentials" }]))
     }
 
 
@@ -119,7 +117,7 @@ const loginController = asyncHandler(async (req, res) => {
     // console.log(accessToken,refreshToken);
 
 
-    res.status(200).json(new ResponseApi(200, "Successfully User login", newData))
+    res.status(200).json(new ApiResponse(200, "Successfully User login", newData))
 })
 
 const currentUser = asyncHandler(async (req,res)=>{

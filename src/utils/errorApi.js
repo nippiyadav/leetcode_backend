@@ -1,13 +1,15 @@
-export class ErrorApi extends Error{
-    constructor(status,message,error=[],stack){
-        super(message);
-        this.message = message;
-        this.success = status >= 400 ? false : true
-        this.error = error
+class ApiError extends Error{
+    constructor(statusCode,message,errors=[],stack){
+        super(message)
+        this.statusCode = statusCode,
+        this.success = false
+        this.errors = errors
         if (stack) {
             this.stack = stack
         }else{
-            Error.captureStackTrace(this, this.constructor)
+            Error.captureStackTrace(this,this.constructor)
         }
     }
 }
+
+export  {ApiError}

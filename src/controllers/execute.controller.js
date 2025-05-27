@@ -1,5 +1,5 @@
-import ApiError from "../../../../cohort_backend/src/utils/apiErrorResponse.js";
-import { ApiResponse } from "../../../../cohort_backend/src/utils/apiResponse.js";
+import { ApiError } from "../utils/errorApi.js";
+import { ApiResponse } from "../utils/responseApi.js";
 import { getJudge0LanguageId, languageName, pollBatchResults, submitBatch } from "../libs/judge0.lib.js";
 import { languageTemplate } from "../libs/languageTemplate.js";
 import { prismaDb } from "../libs/prisma.js";

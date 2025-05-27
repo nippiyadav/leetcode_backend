@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import ApiError from "../../../../cohort_backend/src/utils/apiErrorResponse.js";
 import { prismaDb } from "../libs/prisma.js";
+import { ApiError } from "../utils/errorApi.js";
 
 const authenticaiton = (req, res, next) => {
     let value = req.cookies;

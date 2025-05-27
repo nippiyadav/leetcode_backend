@@ -1,4 +1,4 @@
-import { ApiResponse } from "../../../../cohort_backend/src/utils/apiResponse.js";
+import { ApiResponse } from "../utils/responseApi.js"
 import { prismaDb } from "../libs/prisma.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
