@@ -32,12 +32,12 @@ app.use("/execute-code",executeRouter)
 app.use("/submission",submissionRouter)
 
 
-app.post("/",(req,res)=>{
+app.post("/health",(req,res)=>{
     // console.log("Starting");
     // const data = fs.readFileSync(0,"utf-8");
     // console.log(data);
     // console.log("ending");
-    res.status(200).json(new ApiResponse(200,[],"Successfully fetched Data"))
+    res.status(200).json({backend:"running smoothly"})
 })
 
 
