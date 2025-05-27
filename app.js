@@ -15,13 +15,17 @@ dotenv.config({
     path:"./env"
 });
 
-console.log(process.env.NODE_ENV !== "production"?process.env.FRONTEND_API_DEVELOPMENT:process.env.FRONTEND_API_PRODUCTION);
+const frontendOrigin =
+  process.env.NODE_ENV === "production"
+    ? process.env.FRONTEND_API_PRODUCTION
+    : process.env.FRONTEND_API_DEVELOPMENT;
 
+console.log("Using frontend origin:", frontendOrigin);
 
 app.use(cors({
-    origin:process.env.NODE_ENV !== "production"?process.env.FRONTEND_API_DEVELOPMENT:process.env.FRONTEND_API_PRODUCTION,
-    credentials:true,
-}))
+  origin: frontendOrigin,
+  credentials: true,
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
