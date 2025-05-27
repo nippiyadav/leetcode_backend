@@ -38,7 +38,9 @@ app.get("/health",(req,res)=>{
     // const data = fs.readFileSync(0,"utf-8");
     // console.log(data);
     // console.log("ending");
-    res.status(200).json({backend:"running smoothly"})
+    let value = req.cookies;
+    console.log("value:- ",value);
+    res.status(200).json({backend:"running smoothly",cookies:value})
 })
 
 
