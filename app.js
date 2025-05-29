@@ -52,8 +52,8 @@ app.get("/health",(req,res)=>{
     //     Authorization: `Bearer ${accessToken}`
     // })
     // res.setHeaders()
-    // let value = req.cookies;
-    // console.log("value:- ",value);
+    let value = req.cookies;
+    console.log("value:- ",value);
     res.status(200).json({backend:"running smoothly",cookies:value,})
 })
 
