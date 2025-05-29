@@ -104,21 +104,27 @@ const loginController = asyncHandler(async (req, res) => {
 
     // console.log("updating Data in the login for the ",newData);
     
-    const options = {
-        httpOnly: true,
-        secure:true,
-        sameSite: "none",
-        priority:"high",
-        maxAge: 1000 * 60 * 60 * 24
-    }
-
-    // cookie Options
     // const options = {
-    //     httpOnly: process.env.VITE_NODE_ENV !== "production"?false:true,
-    //     secure: process.env.VITE_NODE_ENV !== "production"?false:true,
+    //     httpOnly: true,
+    //     secure:true,
     //     sameSite: "none",
+    //     priority:"high",
     //     maxAge: 1000 * 60 * 60 * 24
     // }
+
+    // cookie Options
+    
+    res.setHeader(
+        "Authorization", `Bearer ${accessToken}`
+    );
+    
+    const options = {
+        httpOnly: process.env.NODE_ENV !== "production"?false:true,
+        // secure: process.env.NODE_ENV !== "production"?false:true,
+         secure:true,
+        sameSite: "none",
+        maxAge: 1000 * 60 * 60 * 24
+    }
     res.cookie("accessToken", accessToken, options)
 
     console.log(accessToken,refreshToken);
@@ -177,7 +183,7 @@ const logOut = asyncHandler(async (req,res)=>{
     }
 
     res.clearCookie("accessToken",{
-        httpOnly:process.env.VITE_NODE_ENV !== "development",
+        httpOnly:process.env.NODE_ENV !== "development",
         sameSite:"lax",
         secure:process.env.NODE_ENV !== "development"
     })

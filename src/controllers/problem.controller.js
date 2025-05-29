@@ -6,10 +6,10 @@ import { ApiError } from "../utils/errorApi.js"
 import { languageTemplate } from "../libs/languageTemplate.js";
 
 const createProblem = asyncHandler(async (req, res) => {
-    let { title, description, difficulty, tags, example, constraints, tastCases, refrenceSolution, codeSnippets,hints,templateCode } = req.body;
+    let { title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode,demo,company } = req.body;
 
-    console.log("checking:- ",title, description, difficulty, tags, example, constraints, tastCases, refrenceSolution, codeSnippets,hints,templateCode);
-    
+    console.log("checking:- ", title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode);
+
 
     if (req.admin !== "ADMIN") {
         res.status(403).json(new ApiError(403, false, [{ error: "You are not allowed to create a problem" }]))
@@ -19,13 +19,13 @@ const createProblem = asyncHandler(async (req, res) => {
     try {
         const newProblem = await prismaDb.problem.create({
             data: {
-                title, description, difficulty, tags, example, constraints, tastCases, refrenceSolution, codeSnippets,hints,templateCode, userId: req.user.id
+                title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode,demo,company, userId: req.user.id
             }
         })
         return res.status(201).json(new ApiResponse(201, newProblem, "Successfully Created Problem"))
     } catch (error) {
         console.log("Saving in database error occured", { cause: error })
-        return res.status(500).json(new ApiError(500,"Server error",[{error:error}]))
+        return res.status(500).json(new ApiError(500, "Server error", [{ error: error }]))
 
     }
 });
@@ -33,12 +33,12 @@ const createProblem = asyncHandler(async (req, res) => {
 
 const testingProblem = asyncHandler(async (req, res) => {
     // getting all data from req.body
-    let { title, description, difficulty, tags, example, constraints, tastCases, refrenceSolution, codeSnippets, language } = req.body
-    console.log(title, description, difficulty, tags, example, constraints, tastCases, refrenceSolution, codeSnippets, language);
+    let { title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, language } = req.body
+    console.log(title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, language);
 
     // i have wrote below code for execution one by one code
-    refrenceSolution = { [language]: refrenceSolution[language] }
-    console.log("new refrenceSolution:- ", refrenceSolution);
+    referenceSolution = { [language]: referenceSolution[language] }
+    console.log("new referenceSolution:- ", referenceSolution);
 
 
     console.log("createProblem:- ", req.admin)
@@ -48,7 +48,7 @@ const testingProblem = asyncHandler(async (req, res) => {
     }
 
     try {
-        for (const [language, solutionCode] of Object.entries(refrenceSolution)) {
+        for (const [language, solutionCode] of Object.entries(referenceSolution)) {
             const languageId = getJudge0LanguageId(language);
             console.log(languageId);
 
@@ -56,8 +56,8 @@ const testingProblem = asyncHandler(async (req, res) => {
                 res.status(400).json(new ApiError(400, false, [{ error: `language ${language} is not supported` }]))
             }
             // i stuck here because i wrote like language_Id, so please language_id
-            const submission = tastCases.map(({ input, output }) => ({
-                source_code: languageTemplate(codeSnippets[language],solutionCode,language),
+            const submission = testCases.map(({ input, output }) => ({
+                source_code: languageTemplate(codeSnippets[language], solutionCode, language),
                 language_id: languageId,
                 stdin: input,
                 expected_output: output
@@ -101,7 +101,7 @@ const testingProblem = asyncHandler(async (req, res) => {
 })
 
 const getAllProblems = asyncHandler(async (req, res) => {
-    const problems = await prismaDb.problem.findMany({select:{id:true,difficulty:true,title:true,updatedAt:true,createdAt:true}});
+    const problems = await prismaDb.problem.findMany({ select: { id: true, difficulty: true, title: true, updatedAt: true, createdAt: true,demo:true,company:true,tags:true } });
     if (!problems) {
         return res.status(404).json(new ApiError(404, false, [{ error: "Not Found" }]))
     }
@@ -152,7 +152,60 @@ const deleteProblemId = asyncHandler(async (req, res) => {
     res.status(200).json(new ApiResponse(200, deletedProblem, "Successfully deleted problem"))
 })
 
-const getAllProblemSolvedUser = asyncHandler(async (req, res) => { })
+const getAllProblemSolvedUser = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    console.log("userId", userId);
+
+    const userSubmittedProblem = await prismaDb.submission.groupBy({
+        by: ['language', 'problemId'],
+        where: {
+            userId,
+        },
+        _count: true,
+    });
+
+    console.log("userSubmittedProblem:- ", userSubmittedProblem);
+
+
+    const getUserSolvedProblems = await prismaDb.problemSolved.findMany({
+        where: {
+            userId,
+        },
+        // select:{
+        //     problemId:true
+        // },
+        select: {
+            // we have to use the problem not the problemId
+            problem: {
+                select: {
+                    id: true,
+                    title: true,
+                    difficulty: true,
+                }
+            }
+        }
+    });
+
+    const modifiedData = getUserSolvedProblems.map((v, i) => {
+        console.log("v ki value:- ", v);
+        
+       const newdata =  userSubmittedProblem.filter((innerProblem,i)=>{
+        console.log(innerProblem.problemId,v.problem.id);
+        
+            return innerProblem.problemId === v.problem.id
+        });
+
+        console.log("newdata:- ",newdata);
+        
+       return {title:v.problem.title,difficulty:v.problem.difficulty,id:v.problem.id,solvedLanguage:newdata}
+    });
+
+    console.log("modifiedData:- ",modifiedData);
+    
+
+    console.log(getUserSolvedProblems);
+    res.status(200).json(new ApiResponse(200, modifiedData, "Successfully"))
+})
 
 export {
     testingProblem, createProblem, getAllProblems, getProblemsId, updateProblemId, deleteProblemId, getAllProblemSolvedUser

@@ -52,13 +52,15 @@ model Problem {
   tags String[] // ["tag1","tag2","tag3"]
   userId String @db.ObjectId
   example Json
+  company String[]
+  demo Boolean @default(false)
   templateCode Json
   constraints String[]
   hints String[]
   editorial String?
   codeSnippets Json
-  tastCases Json 
-  refrenceSolution Json
+  testCases Json 
+  referenceSolution Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
