@@ -23,8 +23,8 @@ const frontendOrigin =
 console.log("Using frontend origin:", frontendOrigin);
 
 app.use(cors({
-//   origin: "https://leetcode-frontend-o62e.onrender.com",
-  origin: frontendOrigin,
+  origin: "https://leetcode-frontend-o62e.onrender.com",
+  // origin: frontendOrigin,
   credentials: true,
   allowedHeaders:["Access-Control-Allow-Headers",'Content-Type', 'Authorization']
 }));
@@ -44,16 +44,16 @@ app.get("/health",(req,res)=>{
     // const data = fs.readFileSync(0,"utf-8");
     // console.log(data);
     // console.log("ending");
-    console.log(res.cookie("","",{
-        priority:"high",
-        secure:true
-    }));
+    // console.log(res.cookie("","",{
+    //     priority:"high",
+    //     secure:true
+    // }));
     // res.setHeaders({
     //     Authorization: `Bearer ${accessToken}`
     // })
     // res.setHeaders()
-    let value = req.cookies;
-    console.log("value:- ",value);
+    // let value = req.cookies;
+    // console.log("value:- ",value);
     res.status(200).json({backend:"running smoothly",cookies:value,})
 })
 
