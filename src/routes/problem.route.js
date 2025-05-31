@@ -7,7 +7,7 @@ const router = Router();
 router.route("/create-problem").post(authenticaiton, checkAdmin, createProblem)
 router.route("/testing-problem").post(authenticaiton, checkAdmin, testingProblem)
 
-router.route("/get-all-problem").get(authenticaiton, getAllProblems);
+router.route("/get-all-problem").get(getAllProblems);
 
 router.route("/get-problem-id/:id").get(authenticaiton, getProblemsId);
 

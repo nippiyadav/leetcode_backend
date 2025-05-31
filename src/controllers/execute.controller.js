@@ -21,10 +21,12 @@ const executeCode = asyncHandler(async (req, res) => {
     language_id =  getJudge0LanguageId(language);
 
     // 2. prepare test cases for judge0 batch
-    const submissions = stdin.map((input) => ({
+    const submissions = stdin.map((input,i) => ({
         source_code:languageTemplate(codeSnippets,source_code,language),
         language_id,
-        stdin: input
+        stdin: input,
+        expected_output:expected_outputs[i]
+
     }))
 
     console.log(submissions);
@@ -130,6 +132,7 @@ const executeCode = asyncHandler(async (req, res) => {
             testCases:true
         }
     })
+
 
     res.status(200).json(new ApiResponse(200, result, "Successfully executed code"))
 })

@@ -4,6 +4,7 @@ import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judg
 import { ApiResponse } from "../utils/responseApi.js"
 import { ApiError } from "../utils/errorApi.js"
 import { languageTemplate } from "../libs/languageTemplate.js";
+import axios from "axios"
 
 const createProblem = asyncHandler(async (req, res) => {
     let { title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode,demo,company } = req.body;
@@ -48,6 +49,17 @@ const testingProblem = asyncHandler(async (req, res) => {
     }
 
     try {
+
+       const response =  await axios.request({
+            method:"GET",
+            url:'https://judge0-ce.p.rapidapi.com/languages/52',
+            headers:{
+                'x-rapidapi-key': '2a61e5940fmshc460f798f52ba45p1166a1jsn3e521b5b3e5c',
+                'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
+            }
+        });
+        
+
         for (const [language, solutionCode] of Object.entries(referenceSolution)) {
             const languageId = getJudge0LanguageId(language);
             console.log(languageId);
@@ -56,11 +68,11 @@ const testingProblem = asyncHandler(async (req, res) => {
                 res.status(400).json(new ApiError(400, false, [{ error: `language ${language} is not supported` }]))
             }
             // i stuck here because i wrote like language_Id, so please language_id
-            const submission = testCases.map(({ input, output }) => ({
+            const submission = testCases.map(({ input, output }) => ({                
                 source_code: languageTemplate(codeSnippets[language], solutionCode, language),
                 language_id: languageId,
                 stdin: input,
-                expected_output: output
+                // expected_output: output
             }))
 
             // console.log("submission:- ",submission);
@@ -84,6 +96,9 @@ const testingProblem = asyncHandler(async (req, res) => {
                 // i wrote previous like this const result = result[i], so it was a mistkae because it is overriding my above result, but it is not showing error in the code editor
                 const result = results[i];
                 console.log("single Result:- ", result);
+
+                console.log(result.stdout,testCases[0].output,result.stdout==testCases[0].output);
+                
 
                 if (result.status.id !== 3) {
                     return res.status(200).json(new ApiResponse(201, results, "Some TestCase failed"));
