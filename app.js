@@ -23,7 +23,7 @@ const frontendOrigin =
 console.log("Using frontend origin:", frontendOrigin);
 
 app.use(cors({
-  origin: "https://leetcode-frontend-bqaeu40hm-nippiyadavs-projects.vercel.app/",
+  origin: "https://leetcode-frontend-bqaeu40hm-nippiyadavs-projects.vercel.app",
   // origin: frontendOrigin,
   credentials: true,
   allowedHeaders:["Access-Control-Allow-Headers",'Content-Type', 'Authorization']
