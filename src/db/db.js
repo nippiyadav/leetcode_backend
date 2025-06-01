@@ -8,7 +8,7 @@ dotenv.config()
 
 const dbConnection = async () => {
     try {
-        const connectionObj = await mongoose.connect(`${process.env.MONGO_URL}/leetnoob`);
+        const connectionObj = await mongoose.connect(`${process.env.DATABASE_URL}`);
         return connectionObj
     } catch (error) {
         throw new Error(`Connection failed in db.js file:-  ${error}`)

@@ -9,7 +9,7 @@ router.route("/testing-problem").post(authenticaiton, checkAdmin, testingProblem
 
 router.route("/get-all-problem").get(getAllProblems);
 
-router.route("/get-problem-id/:id").get(authenticaiton, getProblemsId);
+router.route("/get-problem-id/:id").get(getProblemsId);
 
 router.route("/update-problem/:id").put(authenticaiton, checkAdmin, updateProblemId);
 

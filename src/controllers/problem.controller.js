@@ -96,6 +96,9 @@ const testingProblem = asyncHandler(async (req, res) => {
                 // i wrote previous like this const result = result[i], so it was a mistkae because it is overriding my above result, but it is not showing error in the code editor
                 const result = results[i];
                 console.log("single Result:- ", result);
+                
+                // const decoded = Buffer.from(result.stderr, 'base64').toString('utf-8');
+                // console.log("decode based64:- ",decoded); // Output: 32
 
                 console.log(result.stdout,testCases[0].output,result.stdout==testCases[0].output);
                 
@@ -105,6 +108,7 @@ const testingProblem = asyncHandler(async (req, res) => {
                     // return res.status(400).json(new ApiError(400, false, [{ error: `TestCase ${i + 1} failed for language ${language}` }]))
                 }
             }
+
 
             return res.status(200).json(new ApiResponse(201, results, "All testCase Passed"))
         }
