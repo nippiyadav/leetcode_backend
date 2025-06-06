@@ -5,9 +5,11 @@ import { ApiResponse } from "../utils/responseApi.js"
 import { ApiError } from "../utils/errorApi.js"
 import { languageTemplate } from "../libs/languageTemplate.js";
 import axios from "axios"
+import { Problem } from "../models/mongodb/problem.model.js";
+import mongoose from "mongoose";
 
 const createProblem = asyncHandler(async (req, res) => {
-    let { title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode,demo,company } = req.body;
+    let { title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode, demo, company } = req.body;
 
     console.log("checking:- ", title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode);
 
@@ -20,7 +22,7 @@ const createProblem = asyncHandler(async (req, res) => {
     try {
         const newProblem = await prismaDb.problem.create({
             data: {
-                title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode,demo,company, userId: req.user.id
+                title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode, demo, company, userId: req.user.id
             }
         })
         return res.status(201).json(new ApiResponse(201, newProblem, "Successfully Created Problem"))
@@ -50,16 +52,6 @@ const testingProblem = asyncHandler(async (req, res) => {
 
     try {
 
-       const response =  await axios.request({
-            method:"GET",
-            url:'https://judge0-ce.p.rapidapi.com/languages/52',
-            headers:{
-                'x-rapidapi-key': '2a61e5940fmshc460f798f52ba45p1166a1jsn3e521b5b3e5c',
-                'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
-            }
-        });
-        
-
         for (const [language, solutionCode] of Object.entries(referenceSolution)) {
             const languageId = getJudge0LanguageId(language);
             console.log(languageId);
@@ -68,7 +60,7 @@ const testingProblem = asyncHandler(async (req, res) => {
                 res.status(400).json(new ApiError(400, false, [{ error: `language ${language} is not supported` }]))
             }
             // i stuck here because i wrote like language_Id, so please language_id
-            const submission = testCases.map(({ input, output }) => ({                
+            const submission = testCases.map(({ input, output }) => ({
                 source_code: languageTemplate(codeSnippets[language], solutionCode, language),
                 language_id: languageId,
                 stdin: input,
@@ -96,12 +88,12 @@ const testingProblem = asyncHandler(async (req, res) => {
                 // i wrote previous like this const result = result[i], so it was a mistkae because it is overriding my above result, but it is not showing error in the code editor
                 const result = results[i];
                 console.log("single Result:- ", result);
-                
+
                 // const decoded = Buffer.from(result.stderr, 'base64').toString('utf-8');
                 // console.log("decode based64:- ",decoded); // Output: 32
 
-                console.log(result.stdout,testCases[0].output,result.stdout==testCases[0].output);
-                
+                console.log(result.stdout, testCases[0].output, result.stdout == testCases[0].output);
+
 
                 if (result.status.id !== 3) {
                     return res.status(200).json(new ApiResponse(201, results, "Some TestCase failed"));
@@ -120,13 +112,144 @@ const testingProblem = asyncHandler(async (req, res) => {
 })
 
 const getAllProblems = asyncHandler(async (req, res) => {
-    const problems = await prismaDb.problem.findMany({ select: { id: true, difficulty: true, title: true, updatedAt: true, createdAt: true,demo:true,company:true,tags:true } });
+    const { page, limit } = req.query;
+    console.log("value:- ", parseInt(page), parseInt(limit));
+
+    // mongoose pipeline methods
+    const pipeLine = [
+        {
+            $facet: {
+                companies: [
+                    {
+                        $unwind: {
+                            path: "$company",
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: "$company",
+                            count: {
+                                $sum: 1
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            companies: {
+                                $push: { k: "$_id", v: "$count" }
+                            }
+                        }
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: { $arrayToObject: "$companies" }
+                        }
+                    }
+                ],
+                tags: [
+                    {
+                        $unwind: "$tags"
+                    },
+                    {
+                        $group: {
+                            _id: "$tags",
+                            count: {
+                                $sum: 1
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            tags: {
+                                $push: {
+                                    k: "$_id",
+                                    v: "$count"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: {
+                                $arrayToObject: "$tags"
+                            }
+                        }
+                    }
+                ],
+                data: [
+                    {
+                        $skip: parseInt(limit)*(page-1)
+                    },
+                    {
+                        $limit: 10
+                    },
+                    {
+                        $project: {
+                            _id: true,
+                            difficulty: true,
+                            title: true,
+                            updatedAt: true,
+                            createdAt: true,
+                            demo: true,
+                            company: true,
+                            tags: true
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            problems: {
+                                $push: "$$ROOT"
+                            }
+                        }
+                    },
+                    {
+                        $addFields: {
+                            page: page
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: false
+                        }
+                    },
+                ],
+                totalProblems: [
+                    {
+                        $count: 'totalProblems'
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                companies: { $arrayElemAt: ["$companies", 0] },
+                tags: { $arrayElemAt: ["$tags", 0] },
+                totalProblems: {
+                    $arrayElemAt: ["$totalProblems.totalProblems", 0]
+                }
+            }
+        }
+    ]
+
+    // we are using this for using aggreagate pipeline of mongoose
+    const db = globalThis.globalForMongoose; // ✅ Access native db object
+    const problemsies = db.collection("Problem");           // ✅ Now works
+    const results = await problemsies.aggregate(pipeLine).toArray();   // ✅ Fetch all
+
+
+
+
+
+    const problems = await prismaDb.problem.findMany({ select: { id: true, difficulty: true, title: true, updatedAt: true, createdAt: true, demo: true, company: true, tags: true } });
     if (!problems) {
         return res.status(404).json(new ApiError(404, false, [{ error: "Not Found" }]))
     }
-    console.log("getProblems- ", problems);
+    // console.log("getProblems- ", problems);
 
-    res.status(200).json(new ApiResponse(200, problems, "Successfuly fetched Problems"))
+    res.status(200).json(new ApiResponse(200, { ...results[0] }, "Successfuly fetched Problems"))
 })
 
 const getProblemsId = asyncHandler(async (req, res) => {
@@ -207,20 +330,20 @@ const getAllProblemSolvedUser = asyncHandler(async (req, res) => {
 
     const modifiedData = getUserSolvedProblems.map((v, i) => {
         console.log("v ki value:- ", v);
-        
-       const newdata =  userSubmittedProblem.filter((innerProblem,i)=>{
-        console.log(innerProblem.problemId,v.problem.id);
-        
+
+        const newdata = userSubmittedProblem.filter((innerProblem, i) => {
+            console.log(innerProblem.problemId, v.problem.id);
+
             return innerProblem.problemId === v.problem.id
         });
 
-        console.log("newdata:- ",newdata);
-        
-       return {title:v.problem.title,difficulty:v.problem.difficulty,id:v.problem.id,solvedLanguage:newdata}
+        console.log("newdata:- ", newdata);
+
+        return { title: v.problem.title, difficulty: v.problem.difficulty, id: v.problem.id, solvedLanguage: newdata }
     });
 
-    console.log("modifiedData:- ",modifiedData);
-    
+    console.log("modifiedData:- ", modifiedData);
+
 
     console.log(getUserSolvedProblems);
     res.status(200).json(new ApiResponse(200, modifiedData, "Successfully"))

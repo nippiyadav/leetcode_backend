@@ -48,7 +48,7 @@ export const pollBatchResults = async (resultTokens) => {
         try {
             const options = {
                 method: 'GET',
-                url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+                url: `${process.env.JUDGE0_API_URL}/submissions/batch`,
                 params: {
                     tokens: resultTokens.join(","),
                     base64_encoded: false,
@@ -59,24 +59,6 @@ export const pollBatchResults = async (resultTokens) => {
                     'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
                 }
             };
-
-
-            // const headers = {
-            //     'x-rapidapi-key': '2a61e5940fmshc460f798f52ba45p1166a1jsn3e521b5b3e5c',
-            //     'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
-            // }
-
-            // const { data } = await axios.get(`${process.env.JUDGE0_API_URL}/submissions/batch`, {
-            //     params: {
-            //         tokens: resultTokens.join(","),
-            //         base64_encoded: false
-            //     },
-            // },
-            //     {
-            //         headers
-            //     }
-            // )
-
 
             const {data} = await axios.request(options);
 	        // console.log(data);

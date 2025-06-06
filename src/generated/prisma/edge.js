@@ -231,12 +231,11 @@ const config = {
     "db"
   ],
   "activeProvider": "mongodb",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "mongodb+srv://chandanyadav:chandan123@chandan.57bnbql.mongodb.net/leetnoob"
       }
     }
   },

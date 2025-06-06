@@ -54,7 +54,7 @@ const checkAdmin = async (req, res, next) => {
 
 
         if (!userRole || userRole.role !== "ADMIN") {
-            return res.status(403).json(new ApiError(403, false, [{ error: "Forbidden - You do not have permission to access this resource" }]))
+            return res.status(403).json(new ApiError(403, false, [{ error: "Not Permission" }]))
         }
         req.admin = userRole.role
         next()
