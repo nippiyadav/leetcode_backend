@@ -16,11 +16,21 @@ const getAllSubmission = asyncHandler(async(req,res)=>{
 const getSubmissionById = asyncHandler(async(req,res)=>{
     const {problemId} = req.params;
     const {id} = req.user;
-    const submissionId = await prismaDb.submission.findMany({
+    const submissionId = await prismaDb.problem.findUnique({
         where:{
-            userId:id,
-            problemId
-        }
+            id:problemId,
+        },
+        select:{
+            title:true,
+            submission:{
+                where:{
+                    problemId:problemId,
+                    userId:id
+                }
+            }
+            
+
+        },
     })
 
     res.status(200).json(new ApiResponse(200,submissionId,"Successfully fetched data"))
@@ -40,4 +50,18 @@ const getSubmissionCount = asyncHandler(async(req,res)=>{
 
 });
 
-export {getAllSubmission,getSubmissionById,getSubmissionCount}
+const getSubmissionDelete = asyncHandler(async(req,res)=>{
+    const {problemId} = req.params;
+    const {id} = req.user;
+    const submissionCount = await prismaDb.submission.delete({
+        where:{
+            id:problemId,
+            userId:id
+        }
+    })
+
+    res.status(200).json(new ApiResponse(200,submissionCount,"Successfully fetched data"))
+
+});
+
+export {getAllSubmission,getSubmissionById,getSubmissionCount,getSubmissionDelete}
