@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticaiton, checkAdmin } from "../middleware/authentication.js";
-import { createProblem, deleteProblemId, getAllProblems, getAllProblemSolvedUser, getProblemsId, testingProblem, updateProblemId } from "../controllers/problem.controller.js";
+import { createProblem, deleteProblemId, getAllProblems, getAllProblemSolvedUser, getProblemsId, getProblemWithSearch, testingProblem, updateProblemId } from "../controllers/problem.controller.js";
 
 const router = Router();
 
@@ -16,5 +16,7 @@ router.route("/update-problem/:id").put(authenticaiton, checkAdmin, updateProble
 router.route("/delete-problem/:id").delete(authenticaiton, checkAdmin, deleteProblemId);
 
 router.route("/get-solved-problems").get(authenticaiton, getAllProblemSolvedUser);
+
+router.route("/get-solved-search").get(getProblemWithSearch);
 
 export default router

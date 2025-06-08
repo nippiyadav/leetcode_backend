@@ -4,9 +4,6 @@ import { getJudge0LanguageId, pollBatchResults, submitBatch } from "../libs/judg
 import { ApiResponse } from "../utils/responseApi.js"
 import { ApiError } from "../utils/errorApi.js"
 import { languageTemplate } from "../libs/languageTemplate.js";
-import axios from "axios"
-import { Problem } from "../models/mongodb/problem.model.js";
-import mongoose from "mongoose";
 
 const createProblem = asyncHandler(async (req, res) => {
     let { title, description, difficulty, tags, example, constraints, testCases, referenceSolution, codeSnippets, hints, templateCode, demo, company } = req.body;
@@ -180,7 +177,7 @@ const getAllProblems = asyncHandler(async (req, res) => {
                 ],
                 data: [
                     {
-                        $skip: parseInt(limit)*(page-1)
+                        $skip: parseInt(limit) * (page - 1)
                     },
                     {
                         $limit: 10
@@ -347,8 +344,45 @@ const getAllProblemSolvedUser = asyncHandler(async (req, res) => {
 
     console.log(getUserSolvedProblems);
     res.status(200).json(new ApiResponse(200, modifiedData, "Successfully"))
+});
+
+const getProblemWithSearch = asyncHandler(async (req, res) => {
+    const { search } = req.query;
+    console.log(search);
+
+
+    const problemsWithMathTag = await prismaDb.problem.findMany({
+        where: {
+            OR: [
+                {
+                    tags: {
+                        has: search // 🔍 finds problems where "math" is in the tags array
+                    }
+                },
+                {
+                    company: {
+                        has: search
+                    }
+                }
+            ]
+        },
+        select: {
+            id: true,
+            difficulty: true,
+            title: true,
+            updatedAt: true,
+            createdAt: true,
+            demo: true,
+            company: true,
+            tags: true
+        }
+    });
+    console.log(problemsWithMathTag);
+
+
+    res.status(200).json(new ApiResponse(200, problemsWithMathTag, "Successfully Fetched Data"))
 })
 
 export {
-    testingProblem, createProblem, getAllProblems, getProblemsId, updateProblemId, deleteProblemId, getAllProblemSolvedUser
+    testingProblem, createProblem, getAllProblems, getProblemsId, updateProblemId, deleteProblemId, getAllProblemSolvedUser, getProblemWithSearch
 }
